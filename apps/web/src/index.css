@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Design Palette */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    --sidebar: 230 16% 12%;
+    --sidebar-foreground: 210 20% 98%;
+    
+    --accent: 354 100% 77%; /* Soft Rose/Pink */
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 210 20% 95%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --radius: 2.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Outfit', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .rounded-panel {
+    @apply rounded-[40px];
+  }
+  
+  .sidebar-icon {
+    @apply w-12 h-12 flex items-center justify-center rounded-2xl transition-all duration-300;
+  }
+  
+  .card-shadow {
+    @apply shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

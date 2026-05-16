@@ -1,0 +1,334 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { 
+  Users, 
+  UserPlus, 
+  Search, 
+  Filter, 
+  MoreVertical, 
+  Shield, 
+  ShieldCheck, 
+  ShieldAlert,
+  Mail,
+  Building2,
+  Calendar,
+  Clock,
+  X,
+  UserCheck,
+  UserMinus,
+  Key,
+  Activity,
+  ChevronRight,
+  Loader2
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { cn } from '../../lib/utils';
+import axios from 'axios';
+import { format } from 'date-fns';
+
+// --- Types ---
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: 'super_admin' | 'branch_admin' | 'supervisor' | 'technician' | 'auditor' | 'vendor';
+  hospital_name: string;
+  department: string;
+  status: 'active' | 'inactive';
+  last_login: string | null;
+  created_at: string;
+  created_by: string;
+}
+
+export default function UsersPage() {
+  const { user: currentUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+
+  // --- Queries ---
+  const { data: users, isLoading } = useQuery({
+    queryKey: ['users-list', activeTab],
+    queryFn: async () => {
+      const res = await axios.get('/api/users');
+      return res.data.data as UserProfile[];
+    }
+  });
+
+  const getRoleBadge = (role: string) => {
+    switch(role) {
+      case 'super_admin': return { label: 'Super Admin', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: ShieldAlert };
+      case 'branch_admin': return { label: 'Admin', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: ShieldCheck };
+      case 'technician': return { label: 'Technician', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Shield };
+      default: return { label: role.replace('_', ' '), color: 'text-slate-500', bg: 'bg-slate-500/10', icon: Shield };
+    }
+  };
+
+  const filteredUsers = users?.filter(u => activeTab === 'all' || u.role === activeTab) || [];
+
+  return (
+    <div className="space-y-8 pb-32">
+      {/* Header & Add Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-white tracking-tighter">Identity Management</h1>
+          <p className="text-slate-400 font-medium text-sm">Managing staff access and security protocols.</p>
+        </div>
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl text-sm font-black shadow-xl shadow-blue-900/20 flex items-center gap-2 transition-all"
+        >
+          <UserPlus size={20} /> Add New Member
+        </button>
+      </div>
+
+      {/* Role Tabs */}
+      <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+        {[
+          { id: 'all', label: 'All Staff' },
+          { id: 'branch_admin', label: 'Administrators' },
+          { id: 'supervisor', label: 'Supervisors' },
+          { id: 'technician', label: 'Technicians' },
+          { id: 'auditor', label: 'Auditors' },
+          { id: 'vendor', label: 'Vendors' },
+        ].map(tab => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              "px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap",
+              activeTab === tab.id ? "bg-slate-800 text-white border border-slate-700" : "text-slate-500 hover:text-slate-300"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Filter Bar */}
+      <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl grid md:grid-cols-4 gap-6 items-center">
+        <div className="relative md:col-span-2">
+          <Search className="absolute left-3 top-3 text-slate-500" size={18} />
+          <input placeholder="Search by name, email or department..." className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white" />
+        </div>
+        {isSuperAdmin && (
+          <select className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+            <option>All Hospitals</option>
+          </select>
+        )}
+        <button className="flex items-center justify-center gap-2 bg-slate-800 text-white rounded-xl py-2.5 text-xs font-bold hover:bg-slate-700 transition-all border border-slate-700">
+          <Filter size={14} /> More Filters
+        </button>
+      </div>
+
+      {/* Users Table */}
+      <div className="bg-slate-900/30 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-md">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-900/50 text-left border-b border-slate-800">
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Team Member</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Access Role</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Entity & Dept</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Status</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Last Auth</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map(u => {
+              const role = getRoleBadge(u.role);
+              return (
+                <tr 
+                  key={u.id} 
+                  onClick={() => setSelectedUser(u)}
+                  className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-all cursor-pointer group"
+                >
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-black text-xs">
+                         {u.name.split(' ').map(n => n[0]).join('')}
+                       </div>
+                       <div className="flex flex-col">
+                         <span className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{u.name}</span>
+                         <span className="text-[10px] text-slate-500 font-medium">{u.email}</span>
+                       </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase border", role.color, role.bg, "border-current/20")}>
+                      <role.icon size={12} />
+                      {role.label}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-white">{u.hospital_name}</span>
+                      <span className="text-[10px] text-slate-500 font-black uppercase">{u.department}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase border", u.status === 'active' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/10' : 'text-slate-500 border-slate-800 bg-slate-800/50')}>
+                      {u.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {u.last_login ? format(new Date(u.last_login), 'dd MMM, HH:mm') : 'Never'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                     <button className="p-2 text-slate-600 hover:text-white transition-all">
+                        <MoreVertical size={18} />
+                     </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* User Detail Drawer */}
+      <AnimatePresence>
+        {selectedUser && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedUser(null)}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100]"
+            />
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className="fixed top-0 right-0 h-screen w-full max-w-md bg-slate-900 border-l border-slate-800 z-[101] shadow-2xl p-8 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-10">
+                <h2 className="text-2xl font-black text-white tracking-tighter">Staff Profile</h2>
+                <button onClick={() => setSelectedUser(null)} className="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-500">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                <div className="flex flex-col items-center text-center space-y-4 py-8 bg-slate-950 rounded-[40px] border border-slate-800">
+                   <div className="w-24 h-24 rounded-[32px] bg-blue-600 text-white flex items-center justify-center text-4xl font-black shadow-2xl shadow-blue-900/40">
+                     {selectedUser.name[0]}
+                   </div>
+                   <div>
+                     <h3 className="text-2xl font-black text-white">{selectedUser.name}</h3>
+                     <p className="text-sm font-medium text-slate-500">{selectedUser.email}</p>
+                   </div>
+                   <div className={cn("px-4 py-1.5 rounded-full text-[10px] font-black uppercase border", getRoleBadge(selectedUser.role).color, getRoleBadge(selectedUser.role).bg, "border-current/20")}>
+                      {getRoleBadge(selectedUser.role).label}
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                      <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Entity</p>
+                      <p className="text-xs font-bold text-white uppercase">{selectedUser.hospital_name}</p>
+                   </div>
+                   <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                      <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Dept</p>
+                      <p className="text-xs font-bold text-white uppercase">{selectedUser.department}</p>
+                   </div>
+                </div>
+
+                {/* Permissions Summary */}
+                <div className="space-y-4">
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Permissions</p>
+                   <div className="grid grid-cols-1 gap-2">
+                      {[
+                        { label: 'View Asset Registry', active: true },
+                        { label: 'Bulk Export Data', active: selectedUser.role.includes('admin') },
+                        { label: 'Approve Maintenance', active: ['branch_admin', 'supervisor'].includes(selectedUser.role) },
+                        { label: 'Delete Records', active: selectedUser.role === 'super_admin' },
+                      ].map((p, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-slate-950/50 rounded-xl border border-slate-800/50">
+                           <span className="text-[10px] font-bold text-slate-300">{p.label}</span>
+                           {p.active ? <ShieldCheck size={14} className="text-emerald-500" /> : <Shield size={14} className="text-slate-700" />}
+                        </div>
+                      ))}
+                   </div>
+                </div>
+
+                <div className="space-y-3 pt-8">
+                  <button className="w-full py-4 bg-slate-800 text-white rounded-2xl font-black text-sm border border-slate-700 hover:bg-slate-700 transition-all flex items-center justify-center gap-3">
+                    <Key size={18} /> Reset Password
+                  </button>
+                  {selectedUser.status === 'active' ? (
+                    <button className="w-full py-4 bg-red-500/10 text-red-500 rounded-2xl font-black text-sm border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center justify-center gap-3">
+                      <UserMinus size={18} /> Deactivate User
+                    </button>
+                  ) : (
+                    <button className="w-full py-4 bg-emerald-500/10 text-emerald-500 rounded-2xl font-black text-sm border border-emerald-500/20 hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-3">
+                      <UserCheck size={18} /> Reactivate User
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Add User Modal */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAddModalOpen(false)}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100]"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed inset-0 m-auto w-full max-w-xl h-fit bg-slate-900 border border-slate-800 rounded-[40px] z-[101] p-10 shadow-2xl space-y-8"
+            >
+              <div>
+                <h2 className="text-3xl font-black text-white tracking-tighter">Add Team Member</h2>
+                <p className="text-slate-400 text-sm">Provision access for a new hospital staff member.</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+                  <input className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white" placeholder="John Doe" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Email Address</label>
+                    <input className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white" placeholder="name@bewell.in" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Role</label>
+                    <select className="w-full bg-slate-950 border border-slate-800 rounded-2xl py-3 px-4 text-sm text-white outline-none">
+                      <option>Technician</option>
+                      <option>Supervisor</option>
+                      <option>Admin</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button onClick={() => setIsAddModalOpen(false)} className="flex-1 py-4 bg-slate-800 text-white rounded-2xl font-black text-sm">Cancel</button>
+                <button className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-900/20">Add Member</button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
