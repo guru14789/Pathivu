@@ -9,6 +9,7 @@ export type Subjects =
   | 'Asset' 
   | 'FaultReport' 
   | 'MaintenanceLog' 
+  | 'MaintenanceSchedule'
   | 'QrCode' 
   | 'Vendor' 
   | 'ComplianceDoc' 

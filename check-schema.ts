@@ -5,7 +5,7 @@ dotenv.config({ path: 'apps/api/.env.development' });
 async function check() {
   const client = new pg.Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: false
   });
   try {
     await client.connect();

@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  History, 
   Search, 
   Filter, 
   Download, 
   ChevronDown, 
   ChevronUp, 
-  User, 
   Clock, 
   Globe, 
   Database,
-  ArrowRight,
   ShieldCheck,
-  Building2,
   ExternalLink,
   ChevronRight,
   DatabaseZap
@@ -40,18 +36,17 @@ interface AuditLog {
 }
 
 export default function AuditLogsPage() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [filterTable, setFilterTable] = useState('all');
 
   const handleExport = () => {
-    // In a real app, this would call an API to generate and download Excel
     console.log('Exporting audit logs...');
     alert('Exporting audit trail to Excel... Your download will start shortly.');
   };
 
   // --- Queries ---
-  const { data: logs, isLoading } = useQuery({
+  const { data: logs } = useQuery({
     queryKey: ['audit-logs', filterTable],
     queryFn: async () => {
       const res = await axios.get('/api/audit-logs', { params: { table_name: filterTable === 'all' ? undefined : filterTable } });
@@ -61,10 +56,10 @@ export default function AuditLogsPage() {
 
   const getActionStyle = (action: string) => {
     switch(action) {
-      case 'INSERT': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'UPDATE': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'DELETE': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+      case 'INSERT': return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+      case 'UPDATE': return 'bg-purple-50 text-purple-600 border-purple-200';
+      case 'DELETE': return 'bg-red-50 text-red-600 border-red-200';
+      default: return 'bg-gray-50 text-gray-500 border-gray-200';
     }
   };
 
@@ -73,25 +68,25 @@ export default function AuditLogsPage() {
       {/* Header & Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tighter">Immutable Audit Ledger</h1>
-          <p className="text-slate-400 font-medium text-sm text-glow-sm">NABH-compliant change tracking and forensic traceability.</p>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Immutable Audit Ledger</h1>
+          <p className="text-gray-500 font-medium text-sm">NABH-compliant change tracking and forensic traceability.</p>
         </div>
         <button 
           onClick={handleExport}
-          className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-slate-700 flex items-center gap-2 transition-all"
+          className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border border-gray-200 flex items-center gap-2 transition-all"
         >
           <Download size={18} /> Export Audit Trail (Excel)
         </button>
       </div>
 
       {/* 1. Filter Bar */}
-      <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl grid md:grid-cols-4 gap-6 items-center backdrop-blur-md">
+      <div className="bg-gray-50 border border-gray-200 p-6 rounded-3xl grid md:grid-cols-4 gap-6 items-center">
         <div className="relative md:col-span-1">
-           <DatabaseZap className="absolute left-3 top-2.5 text-slate-500" size={16} />
+           <DatabaseZap className="absolute left-3 top-2.5 text-gray-400" size={16} />
            <select 
              value={filterTable}
              onChange={(e) => setFilterTable(e.target.value)}
-             className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-xs text-white outline-none"
+             className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-4 text-xs text-gray-700 outline-none focus:border-[#6A1B9A]"
            >
               <option value="all">All Entities</option>
               <option value="assets">Assets</option>
@@ -101,24 +96,24 @@ export default function AuditLogsPage() {
            </select>
         </div>
         <div className="relative md:col-span-2">
-          <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
-          <input placeholder="Search by user or record ID..." className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-xs text-white outline-none" />
+          <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+          <input placeholder="Search by user or record ID..." className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-4 text-xs text-gray-900 outline-none" />
         </div>
-        <button className="flex items-center justify-center gap-2 bg-slate-800 text-white rounded-xl py-2 text-xs font-bold hover:bg-slate-700 transition-all border border-slate-700">
+        <button className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 rounded-xl py-2 text-xs font-bold hover:bg-gray-200 transition-all border border-gray-200">
           <Filter size={14} /> Advanced Filter
         </button>
       </div>
 
       {/* 2. Audit Table */}
-      <div className="bg-slate-900/30 border border-slate-800 rounded-[40px] overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-[40px] overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="text-left border-b border-slate-800 bg-slate-900/50">
-              <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Temporal Stamp</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Entity & Record</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Operation</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Origin Agent</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Trace</th>
+            <tr className="text-left border-b border-gray-200 bg-gray-50">
+              <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">Temporal Stamp</th>
+              <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">Entity & Record</th>
+              <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">Operation</th>
+              <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">Origin Agent</th>
+              <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">Trace</th>
             </tr>
           </thead>
           <tbody>
@@ -128,26 +123,26 @@ export default function AuditLogsPage() {
                   key={log.log_id} 
                   onClick={() => setExpandedRow(expandedRow === log.log_id ? null : log.log_id)}
                   className={cn(
-                    "border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-all cursor-pointer group",
-                    expandedRow === log.log_id && "bg-slate-800/50"
+                    "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-all cursor-pointer group",
+                    expandedRow === log.log_id && "bg-gray-50/50"
                   )}
                 >
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-3">
-                       <Clock size={14} className="text-blue-500" />
+                       <Clock size={14} className="text-[#6A1B9A]" />
                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white">{format(new Date(log.created_at), 'dd MMM yyyy')}</span>
-                          <span className="text-[10px] text-slate-500 font-bold">{format(new Date(log.created_at), 'HH:mm:ss')}</span>
+                          <span className="text-xs font-bold text-gray-900">{format(new Date(log.created_at), 'dd MMM yyyy')}</span>
+                          <span className="text-[10px] text-gray-400 font-bold">{format(new Date(log.created_at), 'HH:mm:ss')}</span>
                        </div>
                     </div>
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex flex-col">
-                       <span className="text-xs font-black text-white uppercase tracking-tighter flex items-center gap-2">
-                         <Database size={12} className="text-slate-600" /> {log.table_name}
+                       <span className="text-xs font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2">
+                         <Database size={12} className="text-gray-400" /> {log.table_name}
                        </span>
                        {/* 4. Record Link */}
-                       <span className="text-[10px] text-blue-500 font-bold hover:underline cursor-pointer">
+                       <span className="text-[10px] text-[#6A1B9A] font-bold hover:underline cursor-pointer">
                          ID: {log.record_id}
                        </span>
                     </div>
@@ -159,23 +154,23 @@ export default function AuditLogsPage() {
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-3">
-                       <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-500">
+                       <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500">
                           {log.user_full_name?.[0] || '?'}
                        </div>
                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white">{log.user_full_name || 'System'}</span>
-                          <span className="text-[9px] text-slate-500 font-black uppercase">{log.user_role}</span>
+                          <span className="text-xs font-bold text-gray-900">{log.user_full_name || 'System'}</span>
+                          <span className="text-[9px] text-gray-400 font-black uppercase">{log.user_role}</span>
                        </div>
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
                     <div className="flex items-center justify-end gap-3">
                        <div className="flex flex-col items-end">
-                          <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                          <span className="text-[10px] font-bold text-gray-500 flex items-center gap-1">
                              <Globe size={10} /> {log.ip_address}
                           </span>
                        </div>
-                       {expandedRow === log.log_id ? <ChevronUp size={18} className="text-white" /> : <ChevronDown size={18} className="text-slate-600" />}
+                       {expandedRow === log.log_id ? <ChevronUp size={18} className="text-gray-900" /> : <ChevronDown size={18} className="text-gray-400" />}
                     </div>
                   </td>
                 </tr>
@@ -187,32 +182,32 @@ export default function AuditLogsPage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="bg-slate-950/50"
+                      className="bg-gray-50/50"
                     >
                       <td colSpan={5} className="px-12 py-8">
                         <div className="grid md:grid-cols-2 gap-8">
                            <div className="space-y-4">
-                              <h4 className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2">
+                              <h4 className="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center gap-2">
                                 <ChevronRight size={14} /> Previous State
                               </h4>
-                              <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl font-mono text-[11px] text-slate-400 overflow-x-auto whitespace-pre leading-relaxed">
+                              <div className="p-6 bg-gray-50 border border-gray-200 rounded-3xl font-mono text-[11px] text-gray-500 overflow-x-auto whitespace-pre leading-relaxed">
                                  {log.old_values ? JSON.stringify(log.old_values, null, 2) : '// No record previous to this action'}
                               </div>
                            </div>
                            <div className="space-y-4">
-                              <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                              <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
                                 <ChevronRight size={14} /> Post-Action State
                               </h4>
-                              <div className="p-6 bg-slate-900 border border-emerald-500/20 rounded-3xl font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre leading-relaxed">
+                              <div className="p-6 bg-gray-50 border border-emerald-200 rounded-3xl font-mono text-[11px] text-gray-500 overflow-x-auto whitespace-pre leading-relaxed">
                                  {log.new_values ? JSON.stringify(log.new_values, null, 2) : '// Record was permanently deleted'}
                               </div>
                            </div>
                         </div>
-                        <div className="mt-8 pt-6 border-t border-slate-800 flex justify-between items-center">
-                           <p className="text-[10px] font-bold text-slate-500 flex items-center gap-2">
+                        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+                           <p className="text-[10px] font-bold text-gray-500 flex items-center gap-2">
                              <ShieldCheck size={14} className="text-emerald-500" /> This log entry is immutable and system-verified.
                            </p>
-                           <button className="text-[10px] font-black text-blue-500 uppercase flex items-center gap-1 hover:underline">
+                           <button className="text-[10px] font-black text-[#6A1B9A] uppercase flex items-center gap-1 hover:underline">
                              View Associated Record <ExternalLink size={12} />
                            </button>
                         </div>

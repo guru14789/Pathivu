@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { amcService } from './amc.service.js';
 import { createAMCSchema, updateAMCSchema } from './amc.validators.js';
-import { validate } from '../../middleware/validate.middleware.js';
-import { requireAuth, requireRole } from '../../middleware/auth.middleware.js';
+import { validate } from '../../lib/validation.js';
+import { AuthRequest, requireAuth, requireRole } from '../../middleware/auth.middleware.js';
 import { uploadSingle } from '../../middleware/upload.middleware.js';
 import { sendSuccess } from '../../lib/response.js';
 
@@ -24,18 +24,20 @@ router.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-router.post('/', requireAuth, requireRole(['super_admin', 'branch_admin']), uploadSingle('document'), validate(createAMCSchema), async (req, res, next) => {
+router.post('/', requireAuth, requireRole(['super_admin', 'branch_admin']), uploadSingle('document'), async (req: AuthRequest, res, next) => {
   try {
-    const contract = await amcService.create(req.body, req.file, req.user!.id);
+    const validatedBody = validate(createAMCSchema, req.body);
+    const contract = await amcService.create(validatedBody, req.file, req.user!.user_id);
     sendSuccess(res, contract, null, 201);
   } catch (error) {
     next(error);
   }
 });
 
-router.patch('/:id', requireAuth, requireRole(['super_admin', 'branch_admin']), validate(updateAMCSchema), async (req, res, next) => {
+router.patch('/:id', requireAuth, requireRole(['super_admin', 'branch_admin']), async (req: AuthRequest, res, next) => {
   try {
-    const contract = await amcService.update(req.params.id, req.body, req.user!.id);
+    const validatedBody = validate(updateAMCSchema, req.body);
+    const contract = await amcService.update(req.params.id as string, validatedBody, req.user!.user_id);
     sendSuccess(res, contract);
   } catch (error) {
     next(error);

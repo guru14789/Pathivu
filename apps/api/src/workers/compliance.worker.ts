@@ -25,7 +25,7 @@ export const complianceWorker = new Worker('compliance-alerts', async (job) => {
     .where(and(
       lte(complianceDocuments.expiry_date, dateStr),
       sql`${complianceDocuments.status} != 'expired'`,
-      eq(complianceDocuments.alert_sent, false)
+      eq(complianceDocuments.alert_30_sent, false)
     ));
 
     for (const item of expiringDocs) {
@@ -36,20 +36,29 @@ export const complianceWorker = new Worker('compliance-alerts', async (job) => {
         ));
 
         const adminEmails = admins.map(a => a.email);
-        await sendComplianceAlert(item.doc, item.hospital, adminEmails);
+        const daysUntilDue = Math.max(0, Math.ceil((new Date(item.doc.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
+
+        for (const email of adminEmails) {
+          await sendComplianceAlert({
+            certType: item.doc.cert_type,
+            assetTag: undefined,
+            daysUntilDue,
+            adminEmail: email
+          });
+        }
         
         emitToHospital(item.hospital.hospital_id, 'alert:compliance', {
-          doc_name: item.doc.document_name,
+          doc_name: item.doc.cert_type,
           expiry_date: item.doc.expiry_date,
         });
 
         await db.update(complianceDocuments)
-          .set({ alert_sent: true })
+          .set({ alert_30_sent: true })
           .where(eq(complianceDocuments.doc_id, item.doc.doc_id));
           
-        logger.info(`Compliance alert sent for ${item.doc.document_name}`);
+        logger.info(`Compliance alert sent for ${item.doc.cert_type}`);
       } catch (err) {
-        logger.error(`Failed to send compliance alert for ${item.doc.document_name}:`, err);
+        logger.error(`Failed to send compliance alert for ${item.doc.cert_type}:`, err);
       }
     }
   }

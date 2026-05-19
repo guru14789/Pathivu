@@ -1,7 +1,6 @@
 import React from 'react';
-import { useAbility } from '@casl/react';
 import { AbilityContext } from '../lib/ability';
-import { Actions, Subjects } from '../lib/ability';
+import type { Actions, Subjects } from '../lib/ability';
 
 interface RoleGateProps {
   children: React.ReactNode;

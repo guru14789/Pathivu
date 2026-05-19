@@ -21,6 +21,7 @@ export const maintenanceWorker = new Worker('maintenance', async job => {
 
     await db.insert(maintenanceLogs).values({
       asset_id: assetId,
+      hospital_id: fault.hospital_id,
       fault_id: faultId,
       maintenance_type: 'breakdown',
       priority: fault.severity === 'critical' ? 'P1' : (fault.severity === 'high' ? 'P1' : 'P2'),

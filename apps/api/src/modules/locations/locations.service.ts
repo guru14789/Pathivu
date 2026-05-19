@@ -17,9 +17,9 @@ export const locationService = {
     await logAudit({
       user_id: userId,
       action: 'CREATE',
-      resource_type: 'locations',
-      resource_id: location.location_id,
-      new_value: location
+      table_name: 'locations',
+      record_id: location.location_id,
+      new_values: location
     });
 
     return location;

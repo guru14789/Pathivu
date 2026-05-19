@@ -2,6 +2,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ability } from '../lib/ability';
 import axios from 'axios';
 
+// Setup Axios request interceptor to attach JWT token
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('bewell_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 interface User {
   user_id: string;
   full_name: string;
@@ -28,12 +42,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if user is logged in
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem('bewell_token');
+        if (!token) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
         const response = await axios.get('/api/auth/me');
-        setUser(response.data);
+        const data = response.data.data || response.data;
+        setUser(data);
         // Update ability
-        ability.update(response.data.permissions || []);
+        ability.update(data.permissions || []);
       } catch (error) {
         setUser(null);
+        localStorage.removeItem('bewell_token');
       } finally {
         setIsLoading(false);
       }
@@ -41,15 +64,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
-  const login = (userData: any) => {
-    setUser(userData.user);
-    if (userData.user.permissions) {
-      ability.update(userData.user.permissions);
+  const login = (apiResponse: any) => {
+    const data = apiResponse.data || apiResponse;
+    const user = data.user;
+    const token = data.accessToken;
+
+    if (token) {
+      localStorage.setItem('bewell_token', token);
+    }
+
+    setUser(user);
+    if (user && user.permissions) {
+      ability.update(user.permissions);
     }
   };
 
   const logout = async () => {
-    await axios.post('/api/auth/logout');
+    try {
+      await axios.post('/api/auth/logout');
+    } catch (e) {}
+    localStorage.removeItem('bewell_token');
     setUser(null);
     ability.update([]);
   };

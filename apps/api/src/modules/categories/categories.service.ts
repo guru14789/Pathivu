@@ -19,9 +19,9 @@ export const categoryService = {
     await logAudit({
       user_id: userId,
       action: 'CREATE',
-      resource_type: 'asset_categories',
-      resource_id: category.category_id,
-      new_value: category
+      table_name: 'asset_categories',
+      record_id: category.category_id,
+      new_values: category
     });
 
     return category;

@@ -49,10 +49,10 @@ export class ReportsService {
       priority: maintenanceLogs.priority,
       status: maintenanceLogs.status,
       scheduled_date: maintenanceLogs.scheduled_date,
-      completed_at: maintenanceLogs.completed_at,
+      completed_at: maintenanceLogs.completed_date,
       downtime_hours: maintenanceLogs.downtime_hours,
-      actual_cost: maintenanceLogs.actual_cost,
-      remarks: maintenanceLogs.remarks,
+      actual_cost: maintenanceLogs.cost,
+      remarks: maintenanceLogs.technician_remarks,
       assigned_to_name: users.full_name,
     })
     .from(maintenanceLogs)

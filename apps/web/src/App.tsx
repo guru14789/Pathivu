@@ -32,6 +32,7 @@ import ReportsPage from './pages/admin/ReportsPage';
 import AuditLogsPage from './pages/admin/AuditLogsPage';
 import QRGeneratorPage from './pages/admin/QRGeneratorPage';
 import ScanLogsPage from './pages/admin/ScanLogsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 // Public Pages
 import PublicScanPage from './pages/public/PublicScanPage';
@@ -104,6 +105,7 @@ function App() {
                 <Route path="inventory" element={<InventoryPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="audit-logs" element={<AuditLogsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Routes>
           </Router>

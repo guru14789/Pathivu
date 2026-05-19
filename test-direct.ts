@@ -1,21 +1,27 @@
 import pg from 'pg';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: 'apps/api/.env.development' });
 
-async function test() {
-  console.log('Connecting to:', process.env.DATABASE_URL);
+const urlLocal = 'postgresql://localhost:5432/bewell_db';
+
+async function testUrl(name: string, connectionString: string) {
+  console.log(`\nTesting: ${name}`);
   const client = new pg.Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    connectionString,
   });
   try {
     await client.connect();
-    console.log('Connected!');
-    const res = await client.query('SELECT email, role FROM users');
-    console.log('Users:', res.rows);
+    console.log(`SUCCESS connected to ${name}`);
+    const res = await client.query('SELECT current_user, now()');
+    console.log('Result:', res.rows[0]);
     await client.end();
   } catch (err) {
-    console.error('Failed:', err);
+    console.error(`FAILED connected to ${name}:`, err);
   }
 }
-test();
+
+async function main() {
+  await testUrl('Local PostgreSQL', urlLocal);
+}
+
+main();
+
+

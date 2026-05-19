@@ -37,7 +37,7 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
-    command: npm run worker
+    command: npm run workers
     environment:
       DATABASE_URL: postgresql://${DB_USER:-bewell}:${DB_PASSWORD:-bewell_pass}@postgres:5432/${DB_NAME:-bewell_db}
       REDIS_HOST: redis

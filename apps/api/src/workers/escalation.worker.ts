@@ -25,7 +25,7 @@ export const escalationWorker = new Worker('fault-escalation', async (job) => {
         ));
         
         const emails = admins.map(a => a.email);
-        await sendEscalationAlert(fault, asset, emails);
+        await sendEscalationAlert({ fault, asset, supervisorEmails: emails });
         
         emitToHospital(fault.hospital_id, 'alert:escalation', {
           fault_id: fault.fault_id,

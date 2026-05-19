@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +20,6 @@ import {
   LogOut,
   ArrowRight
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
 import axios from 'axios';
@@ -41,28 +40,28 @@ export default function PublicScanPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] text-white">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           className="mb-4"
         >
-          <ShieldCheck className="w-12 h-12 text-blue-500" />
+          <ShieldCheck className="w-12 h-12 text-[#6A1B9A]" />
         </motion.div>
-        <p className="text-slate-400 font-medium">Fetching asset identity...</p>
+        <p className="text-gray-500 font-medium">Fetching asset identity...</p>
       </div>
     );
   }
 
   if (error || !asset) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0f172a] p-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6 text-center">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h1 className="text-2xl font-bold text-white mb-2">Asset Not Found</h1>
-        <p className="text-slate-400 mb-8">The QR code you scanned may be invalid or the asset has been decommissioned.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Asset Not Found</h1>
+        <p className="text-gray-500 mb-8">The QR code you scanned may be invalid or the asset has been decommissioned.</p>
         <button 
           onClick={() => navigate('/login')}
-          className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold"
+          className="px-8 py-3 bg-[#6A1B9A] text-white rounded-xl font-bold"
         >
           Return to Portal
         </button>
@@ -76,26 +75,25 @@ export default function PublicScanPage() {
   const isAuditor = role === 'auditor' || role === 'super_admin';
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-200 pb-24">
+    <div className="min-h-screen bg-gray-50 text-gray-700 pb-24">
       {/* 1. Asset Identity Block */}
-      <header className="relative bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 px-6 pt-12 pb-8 overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl" />
+      <header className="bg-white border-b border-gray-200 px-6 pt-12 pb-8 overflow-hidden">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 flex flex-col items-center text-center space-y-4"
+          className="flex flex-col items-center text-center space-y-4"
         >
-          <div className="w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center shadow-inner border border-slate-700">
-            <Wrench className="w-10 h-10 text-blue-500" />
+          <div className="w-20 h-20 bg-gray-100 border-gray-200 rounded-2xl flex items-center justify-center border">
+            <Wrench className="w-10 h-10 text-[#6A1B9A]" />
           </div>
           <div>
             <div className="flex items-center justify-center gap-2 mb-1">
-              <span className="text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 px-2 py-0.5 rounded">
+              <span className="text-xs font-bold tracking-widest bg-purple-100 text-[#6A1B9A] uppercase px-2 py-0.5 rounded">
                 {asset.asset_tag}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{asset.name}</h1>
-            <p className="text-slate-400 text-sm mt-1">{asset.category || 'General Equipment'}</p>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{asset.name}</h1>
+            <p className="text-gray-500 text-sm mt-1">{asset.category || 'General Equipment'}</p>
           </div>
         </motion.div>
       </header>
@@ -103,19 +101,19 @@ export default function PublicScanPage() {
       <main className="px-6 py-8 space-y-8 max-w-lg mx-auto">
         
         {/* 2. Condition Badge */}
-        <section className="flex items-center justify-between bg-slate-900/40 p-4 rounded-2xl border border-slate-800">
+        <section className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-800 rounded-lg">
-              <Info className="w-5 h-5 text-slate-400" />
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <Info className="w-5 h-5 text-gray-400" />
             </div>
-            <span className="text-sm font-medium text-slate-400 uppercase tracking-wider">Current Condition</span>
+            <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Current Condition</span>
           </div>
           <span className={cn(
-            "px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter shadow-lg",
-            asset.condition === 'good' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
-            asset.condition === 'fair' ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" :
-            asset.condition === 'poor' ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" :
-            "bg-red-500/20 text-red-400 border border-red-500/30"
+            "px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter",
+            asset.condition === 'good' ? "bg-emerald-100 text-emerald-700 border border-emerald-200" :
+            asset.condition === 'fair' ? "bg-amber-100 text-amber-700 border border-amber-200" :
+            asset.condition === 'poor' ? "bg-orange-100 text-orange-700 border border-orange-200" :
+            "bg-red-100 text-red-700 border border-red-200"
           )}>
             {asset.condition || 'Unknown'}
           </span>
@@ -123,22 +121,22 @@ export default function PublicScanPage() {
 
         {/* 3. Location Breadcrumb */}
         <section className="space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Asset Location</h3>
-          <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Asset Location</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-4">
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-blue-500/10 rounded-lg mt-1">
-                <Building2 className="w-5 h-5 text-blue-500" />
+              <div className="p-2 bg-purple-100 rounded-lg mt-1">
+                <Building2 className="w-5 h-5 text-[#6A1B9A]" />
               </div>
               <div className="flex-1 space-y-1">
-                <p className="text-xs text-slate-500 font-medium">Placement</p>
-                <div className="flex flex-wrap items-center gap-1 text-sm font-semibold text-white leading-tight">
+                <p className="text-xs text-gray-500 font-medium">Placement</p>
+                <div className="flex flex-wrap items-center gap-1 text-sm font-semibold text-gray-900 leading-tight">
                   <span>BeWell Main</span>
-                  <ChevronRight size={14} className="text-slate-600" />
-                  <span className="text-slate-400 font-normal">{asset.location?.split(' - ')[0] || 'Block A'}</span>
-                  <ChevronRight size={14} className="text-slate-600" />
-                  <span className="text-slate-400 font-normal">{asset.location?.split(' - ')[1] || 'Floor 1'}</span>
+                  <ChevronRight size={14} className="text-gray-400" />
+                  <span className="text-gray-500 font-normal">{asset.location?.split(' - ')[0] || 'Block A'}</span>
+                  <ChevronRight size={14} className="text-gray-400" />
+                  <span className="text-gray-500 font-normal">{asset.location?.split(' - ')[1] || 'Floor 1'}</span>
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-xs text-blue-400 bg-blue-400/5 px-2 py-1 rounded w-fit">
+                <div className="mt-2 flex items-center gap-2 text-xs bg-purple-50 text-[#6A1B9A] px-2 py-1 rounded w-fit">
                   <MapPin size={12} />
                   {asset.location?.split(' - ')[2] || 'Emergency Ward'}
                 </div>
@@ -148,17 +146,17 @@ export default function PublicScanPage() {
         </section>
 
         {/* 4. Last Service Date */}
-        <section className="bg-gradient-to-br from-slate-900/60 to-slate-900/40 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
+        <section className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-2 bg-purple-500/10 rounded-lg">
-              <Calendar className="w-5 h-5 text-purple-500" />
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Calendar className="w-5 h-5 text-[#6A1B9A]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">Last Maintenance</p>
-              <p className="text-lg font-bold text-white">{asset.last_service_date || 'Oct 12, 2024'}</p>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">Last Maintenance</p>
+              <p className="text-lg font-bold text-gray-900">{asset.last_service_date || 'Oct 12, 2024'}</p>
             </div>
           </div>
-          <History className="w-5 h-5 text-slate-700" />
+          <History className="w-5 h-5 text-gray-300" />
         </section>
 
         {/* 10. Login Prompt (Unauthenticated) */}
@@ -166,7 +164,7 @@ export default function PublicScanPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-blue-600 border border-blue-500 rounded-2xl p-6 shadow-xl shadow-blue-600/20"
+            className="bg-[#6A1B9A] border-[#6A1B9A] rounded-2xl p-6"
           >
             <div className="flex items-start gap-4">
               <div className="p-3 bg-white/10 rounded-xl">
@@ -174,10 +172,10 @@ export default function PublicScanPage() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-white font-bold leading-tight">Gated Access</h4>
-                <p className="text-blue-100 text-sm">Log in as a hospital staff member to see detailed history and take maintenance actions.</p>
+                <p className="text-purple-100 text-sm">Log in as a hospital staff member to see detailed history and take maintenance actions.</p>
                 <Link 
                   to="/login"
-                  className="inline-flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-bold shadow-lg"
+                  className="inline-flex items-center gap-2 bg-white text-[#6A1B9A] px-4 py-2 rounded-lg text-sm font-bold shadow-lg"
                 >
                   Log In Now <ArrowRight size={16} />
                 </Link>
@@ -197,24 +195,24 @@ export default function PublicScanPage() {
               {/* 5. Service Log Timeline (Supervisor+) */}
               {isSupervisor && (
                 <section className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Service History</h3>
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Service History</h3>
+                  <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
                     {[1, 2, 3].map((item, idx) => (
                       <div key={item} className={cn(
                         "p-4 flex items-center justify-between",
-                        idx !== 2 && "border-b border-slate-800"
+                        idx !== 2 && "border-b border-gray-100"
                       )}>
                         <div className="flex gap-3">
-                          <div className="w-1 bg-blue-500 rounded-full my-1" />
+                          <div className="w-1 bg-[#6A1B9A] rounded-full my-1" />
                           <div>
-                            <p className="text-sm font-bold text-white">Periodic Calibration</p>
-                            <p className="text-[10px] text-slate-500 uppercase">Oct 12, 2024 • Tech-ID: BEW-902</p>
+                            <p className="text-sm font-bold text-gray-900">Periodic Calibration</p>
+                            <p className="text-[10px] text-gray-500 uppercase">Oct 12, 2024 • Tech-ID: BEW-902</p>
                           </div>
                         </div>
-                        <span className="text-[10px] font-black uppercase text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">Verified</span>
+                        <span className="text-[10px] font-black uppercase bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">Verified</span>
                       </div>
                     ))}
-                    <button className="w-full p-4 text-xs font-bold text-blue-400 bg-slate-800/30 hover:bg-slate-800/50 transition-colors">
+                    <button className="w-full p-4 text-xs font-bold bg-gray-50 text-[#6A1B9A] hover:bg-gray-100 transition-colors">
                       View Full Maintenance Log
                     </button>
                   </div>
@@ -224,30 +222,30 @@ export default function PublicScanPage() {
               {/* 6. Vendor Section (Branch Admin+) */}
               {isAdmin && (
                 <section className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Vendor & Support</h3>
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Vendor & Support</h3>
+                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700">
-                          <Building2 size={20} className="text-slate-400" />
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                          <Building2 size={20} className="text-gray-400" />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-white">MedTech Solutions Inc.</p>
-                          <p className="text-xs text-emerald-500 font-medium">AMC Active (Premium)</p>
+                          <p className="text-sm font-bold text-gray-900">MedTech Solutions Inc.</p>
+                          <p className="text-xs text-emerald-600 font-medium">AMC Active (Premium)</p>
                         </div>
                       </div>
-                      <button className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                      <button className="p-2 bg-purple-100 text-[#6A1B9A] rounded-lg">
                         <ExternalLink size={18} />
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                       <div className="space-y-1">
-                        <p className="text-[10px] text-slate-500 uppercase font-bold">Contact Person</p>
-                        <p className="text-xs text-white">Rajesh Kumar</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Contact Person</p>
+                        <p className="text-xs text-gray-900">Rajesh Kumar</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] text-slate-500 uppercase font-bold">Priority Line</p>
-                        <p className="text-xs text-blue-400">+91 98765 43210</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Priority Line</p>
+                        <p className="text-xs text-[#6A1B9A]">+91 98765 43210</p>
                       </div>
                     </div>
                   </div>
@@ -257,25 +255,25 @@ export default function PublicScanPage() {
               {/* 7. Financial Section (Admin+) */}
               {isAdmin && (
                 <section className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Financial Identity</h3>
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 space-y-5">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Financial Identity</h3>
+                  <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-5">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-amber-500/10 rounded-xl">
-                        <CreditCard className="w-6 h-6 text-amber-500" />
+                      <div className="p-3 bg-amber-100 rounded-xl">
+                        <CreditCard className="w-6 h-6 text-amber-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500 font-medium uppercase tracking-widest leading-none mb-1">Purchase Value</p>
-                        <p className="text-xl font-black text-white">₹ 1,45,000</p>
+                        <p className="text-xs text-gray-400 font-medium uppercase tracking-widest leading-none mb-1">Purchase Value</p>
+                        <p className="text-xl font-black text-gray-900">₹ 1,45,000</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+                    <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-200">
                       <div className="space-y-1">
-                        <p className="text-[10px] text-slate-500 uppercase font-bold">Warranty Expiry</p>
-                        <p className="text-xs text-white">Dec 2026</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Warranty Expiry</p>
+                        <p className="text-xs text-gray-900">Dec 2026</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] text-slate-500 uppercase font-bold">Depreciated Value</p>
-                        <p className="text-xs text-red-400">₹ 82,400</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Depreciated Value</p>
+                        <p className="text-xs text-red-600">₹ 82,400</p>
                       </div>
                     </div>
                   </div>
@@ -285,23 +283,23 @@ export default function PublicScanPage() {
               {/* 8. All Scan History (Auditor + Super Admin) */}
               {isAuditor && (
                 <section className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Audit Trail (Recent Scans)</h3>
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Audit Trail (Recent Scans)</h3>
+                  <div className="bg-white border border-gray-200 rounded-2xl p-4 space-y-4">
                     {[1, 2].map((scan) => (
                       <div key={scan} className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center text-xs text-slate-400 border border-slate-700">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xs text-gray-500 border border-gray-200">
                           {scan}
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-white font-medium">Suresh Kumar (Admin)</span>
-                            <span className="text-slate-500">2h ago</span>
+                            <span className="text-gray-900 font-medium">Suresh Kumar (Admin)</span>
+                            <span className="text-gray-400">2h ago</span>
                           </div>
-                          <p className="text-[10px] text-slate-600">IP: 192.168.1.104 • Device: iPhone 15 Pro</p>
+                          <p className="text-[10px] text-gray-400">IP: 192.168.1.104 • Device: iPhone 15 Pro</p>
                         </div>
                       </div>
                     ))}
-                    <button className="w-full pt-2 text-xs font-bold text-slate-400 border-t border-slate-800 flex items-center justify-center gap-2">
+                    <button className="w-full pt-2 text-xs font-bold text-gray-500 border-t border-gray-200 flex items-center justify-center gap-2">
                       <Eye size={14} /> See Detailed Scan Analytics
                     </button>
                   </div>
@@ -313,7 +311,7 @@ export default function PublicScanPage() {
       </main>
 
       {/* 9. Action Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur-2xl border-t border-slate-800 p-6 flex gap-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6 flex gap-4 z-50">
         <button 
           onClick={() => navigate(`/fault/${assetTag}`)}
           className="flex-1 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-red-900/20 flex items-center justify-center gap-3"
@@ -322,12 +320,12 @@ export default function PublicScanPage() {
           Report Fault
         </button>
         {user && ['technician', 'supervisor', 'branch_admin', 'super_admin'].includes(user.role) && (
-          <button className="w-16 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl flex items-center justify-center border border-slate-700 transition-all">
+          <button className="w-16 bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center border border-gray-200 hover:bg-gray-200 transition-all">
             <Clock size={20} />
           </button>
         )}
         {user && ['branch_admin', 'super_admin'].includes(user.role) && (
-          <button className="w-16 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl flex items-center justify-center border border-slate-700 transition-all">
+          <button className="w-16 bg-gray-100 text-gray-700 rounded-2xl flex items-center justify-center border border-gray-200 hover:bg-gray-200 transition-all">
             <ShieldCheck size={20} />
           </button>
         )}
@@ -338,7 +336,7 @@ export default function PublicScanPage() {
         <div className="fixed top-4 right-4 z-50">
           <button 
             onClick={() => useAuth().logout()}
-            className="w-10 h-10 bg-slate-900/80 backdrop-blur-lg border border-slate-800 rounded-full flex items-center justify-center text-red-500 shadow-xl"
+            className="w-10 h-10 bg-white/80 border border-gray-200 rounded-full flex items-center justify-center text-red-600 shadow-sm"
           >
             <LogOut size={18} />
           </button>

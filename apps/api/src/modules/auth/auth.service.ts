@@ -32,7 +32,7 @@ export const authService = {
     };
 
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '15m' });
-    const refreshToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, { expiresIn: '7d' });
 
     // Update last login
     await db.update(users).set({ last_login: new Date() }).where(eq(users.user_id, user.user_id));
@@ -62,7 +62,7 @@ export const authService = {
 
   async refreshToken(token: string) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as any;
       const payload = {
         user_id: decoded.user_id,
         role: decoded.role,

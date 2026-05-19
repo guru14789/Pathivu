@@ -74,7 +74,7 @@ export const scanService = {
         condition: result.asset.condition,
         last_service_date: lastMaint?.completed_date || 'None',
         open_fault_count: Number(faultCount),
-        amc_status: result.asset.is_under_warranty ? 'Active (Warranty)' : 'Inactive',
+        amc_status: (result.asset.warranty_expiry && result.asset.warranty_expiry > new Date()) ? 'Active (Warranty)' : 'Inactive',
       };
     }
 

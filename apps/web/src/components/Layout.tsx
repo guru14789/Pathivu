@@ -1,31 +1,28 @@
-import React from 'react';
+import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Users, 
-  Settings, 
-  LogOut, 
-  Wrench, 
-  AlertCircle, 
-  Calendar, 
-  QrCode, 
-  Building2, 
-  Truck, 
-  FileCheck, 
-  Box, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  Settings,
+  LogOut,
+  Wrench,
+  AlertCircle,
+  Calendar,
+  QrCode,
+  Building2,
+  FileCheck,
+  Box,
+  BarChart3,
   History,
-  ScanLine,
-  Menu,
-  Grid,
-  PlusCircle,
   Bell,
   Search,
-  ChevronRight
+  Menu,
+  X,
+  ChevronDown,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { ability } from '../lib/ability';
 
@@ -48,6 +45,8 @@ const Layout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -56,18 +55,65 @@ const Layout = () => {
 
   if (!user) return null;
 
+  const currentNav = navItems.find(item => location.pathname === item.path || location.pathname.startsWith(item.path + '/'));
+  const breadcrumbLabel = currentNav?.label || 'Dashboard';
+
   return (
-    <div className="flex h-screen bg-[#F5F7FA] p-6 gap-6 overflow-hidden">
-      {/* Sidebar - Matching the Dark Rounded Sidebar in Image */}
-      <aside className="w-20 bg-[#1A1C24] rounded-[40px] flex flex-col items-center py-8 shadow-2xl relative">
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileSidebarOpen(false)}
+            className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        layout
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className={cn(
+          "hidden lg:flex flex-col bg-white border-r border-gray-200 relative z-30 shadow-sm",
+          sidebarCollapsed ? "w-[72px]" : "w-[240px]"
+        )}
+      >
         {/* Logo */}
-        <div className="mb-10">
-          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-45">
-            <div className="w-6 h-6 bg-[#1A1C24] rounded-lg -rotate-45" />
-          </div>
+        <div className={cn(
+          "flex items-center h-[72px] border-b border-gray-100 px-4",
+          sidebarCollapsed ? "justify-center" : "justify-between"
+        )}>
+          {!sidebarCollapsed ? (
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#6A1B9A] flex items-center justify-center shadow-sm">
+                <span className="text-xs font-bold text-white">BA</span>
+              </div>
+              <div>
+                <span className="text-base font-bold text-gray-900 tracking-tight">BeWell</span>
+                <span className="text-[10px] font-semibold text-[#6A1B9A] block leading-none -mt-0.5">AssetIQ</span>
+              </div>
+            </div>
+          ) : (
+            <div className="w-9 h-9 rounded-xl bg-[#6A1B9A] flex items-center justify-center shadow-sm">
+              <span className="text-xs font-bold text-white">BA</span>
+            </div>
+          )}
+          {!sidebarCollapsed && (
+            <button
+              onClick={() => setSidebarCollapsed(true)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+            >
+              <ChevronDown size={16} className="rotate-90" />
+            </button>
+          )}
         </div>
 
-        <nav className="flex-1 flex flex-col gap-4 no-scrollbar overflow-y-auto px-2">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-0.5">
           {navItems.filter(item => {
             if (item.path === '/dashboard') return true;
             if (item.path === '/assets') return ability.can('read', 'Asset');
@@ -83,93 +129,192 @@ const Layout = () => {
             if (item.path === '/audit-logs') return ability.can('read', 'AuditLog');
             return true;
           }).map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
             return (
-              <Link 
+              <Link
                 key={item.path}
-                to={item.path} 
+                to={item.path}
+                onClick={() => setMobileSidebarOpen(false)}
                 className={cn(
-                  "relative sidebar-icon group",
-                  isActive ? "text-white" : "text-slate-500 hover:text-slate-300"
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group relative",
+                  sidebarCollapsed && "justify-center px-0",
+                  isActive
+                    ? "bg-[#6A1B9A]/8 text-[#6A1B9A] font-semibold"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                 )}
               >
                 {isActive && (
-                  <motion.div 
-                    layoutId="activeNav"
-                    className="absolute inset-0 bg-[#FF8C94] rounded-2xl shadow-[0_0_20px_rgba(255,140,148,0.4)]"
+                  <motion.div
+                    layoutId="navPill"
+                    className="absolute left-0 w-1 h-6 bg-[#6A1B9A] rounded-r-full"
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
-                <item.icon size={22} className="relative z-10" />
-                
-                {/* Tooltip */}
-                <div className="absolute left-24 bg-[#1A1C24] text-white text-[10px] font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 uppercase tracking-widest shadow-xl">
-                  {item.label}
+                <div className={cn(
+                  "relative z-10 flex items-center justify-center shrink-0",
+                  isActive ? "text-[#6A1B9A]" : "text-gray-400 group-hover:text-gray-600"
+                )}>
+                  <item.icon size={20} />
                 </div>
+                {!sidebarCollapsed && (
+                  <span className={cn(
+                    "relative z-10 text-sm",
+                    isActive ? "text-[#6A1B9A]" : "text-gray-500 group-hover:text-gray-700"
+                  )}>
+                    {item.label}
+                  </span>
+                )}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50 shadow-lg">
+                    {item.label}
+                  </div>
+                )}
               </Link>
             );
           })}
         </nav>
 
         {/* Footer */}
-        <div className="mt-auto flex flex-col gap-6 items-center">
-          <button className="text-slate-500 hover:text-white transition-colors">
-            <Settings size={22} />
+        <div className={cn(
+          "border-t border-gray-100 p-3 space-y-1",
+          sidebarCollapsed && "flex flex-col items-center"
+        )}>
+          <Link
+            to="/settings"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-gray-500 hover:text-gray-700 hover:bg-gray-100",
+              sidebarCollapsed && "justify-center px-0"
+            )}
+          >
+            <Settings size={20} className="shrink-0" />
+            {!sidebarCollapsed && <span className="text-sm">Settings</span>}
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-gray-500 hover:text-red-600 hover:bg-red-50 w-full",
+              sidebarCollapsed && "justify-center px-0"
+            )}
+          >
+            <LogOut size={20} className="shrink-0" />
+            {!sidebarCollapsed && <span className="text-sm">Logout</span>}
           </button>
-          
-          <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#FF8C94]/20 p-0.5">
-            <img 
-              src={`https://ui-avatars.com/api/?name=${user?.full_name || "Guest User"}&background=FF8C94&color=fff&bold=true`} 
-              className="w-full h-full rounded-[14px]"
-              alt="Avatar"
-            />
+
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-3 px-3 py-3 mt-2 border-t border-gray-100">
+              <div className="w-8 h-8 rounded-lg bg-[#6A1B9A] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-800 truncate">{user?.full_name || 'User'}</p>
+                <p className="text-[10px] font-medium text-gray-500 truncate capitalize">{user?.role?.replace('_', ' ') || ''}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.aside>
+
+      {/* Mobile sidebar */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <motion.aside
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 w-[260px] bg-white border-r border-gray-200 z-50 flex flex-col lg:hidden shadow-xl"
+          >
+            <div className="flex items-center justify-between h-[72px] px-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#6A1B9A] flex items-center justify-center shadow-sm">
+                  <span className="text-[10px] font-bold text-white">BA</span>
+                </div>
+                <div>
+                  <span className="text-sm font-bold text-gray-900">BeWell</span>
+                  <span className="text-[9px] font-semibold text-[#6A1B9A] block leading-none">AssetIQ</span>
+                </div>
+              </div>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+                <X size={18} />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-0.5">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
+                      isActive ? "bg-[#6A1B9A]/8 text-[#6A1B9A] font-semibold" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <item.icon size={20} />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top navbar */}
+        <header className="h-[72px] flex items-center justify-between px-6 lg:px-8 border-b border-gray-200 bg-white sticky top-0 z-20">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* Breadcrumb */}
+            <nav className="hidden lg:flex items-center gap-2 text-sm">
+              <span className="text-gray-400">Pages</span>
+              <ChevronDown size={12} className="text-gray-300 -rotate-90" />
+              <span className="font-semibold text-gray-800">{breadcrumbLabel}</span>
+            </nav>
+
+            {/* Search */}
+            <div className="relative hidden md:block w-72 lg:w-80 ml-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                placeholder="Search assets, team, reports..."
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 pl-10 pr-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-[#6A1B9A]/30 focus:bg-white focus:ring-1 focus:ring-[#6A1B9A]/10 transition-all"
+              />
+            </div>
           </div>
 
-          <button 
-            onClick={handleLogout}
-            className="w-12 h-12 bg-[#FF8C94]/10 text-[#FF8C94] rounded-2xl flex items-center justify-center hover:bg-[#FF8C94] hover:text-white transition-all shadow-lg shadow-[#FF8C94]/10"
-          >
-            <LogOut size={20} />
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content - Floating White Panel */}
-      <main className="flex-1 bg-white rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
-        {/* Header */}
-        <header className="h-24 px-10 flex items-center justify-between border-b border-slate-50">
-           <div className="flex items-center gap-12">
-              <div className="relative w-96">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                 <input 
-                   placeholder="Search assets, faults or team members..."
-                   className="w-full bg-[#F5F7FA] border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-[#FF8C94]/20 transition-all"
-                 />
+          <div className="flex items-center gap-3">
+            <button className="relative p-2.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+              <Bell size={18} />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E53935] border-2 border-white" />
+            </button>
+            <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
+              <div className="hidden sm:block text-right">
+                <p className="text-sm font-semibold text-gray-800">{user?.full_name || 'User'}</p>
+                <p className="text-[10px] font-medium text-gray-500 capitalize">{user?.role?.replace('_', ' ') || ''}</p>
               </div>
-           </div>
-
-           <div className="flex items-center gap-6">
-              <button className="w-12 h-12 bg-[#F5F7FA] rounded-2xl flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-all relative">
-                 <Bell size={20} />
-                 <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-[#FF8C94] rounded-full border-2 border-white shadow-sm" />
-              </button>
-              
-              <div className="flex items-center gap-4 pl-4 border-l border-slate-100">
-                 <div className="text-right">
-                    <p className="text-sm font-bold text-slate-900">{user?.full_name || "Guest User"}</p>
-                    <p className="text-[10px] font-black text-[#FF8C94] uppercase tracking-widest">{user?.role || "User"}</p>
-                 </div>
-                 <div className="w-12 h-12 bg-[#F5F7FA] rounded-2xl flex items-center justify-center text-[#FF8C94] font-black">
-                    {user?.full_name?.charAt(0) || "U"}
-                 </div>
+              <div className="w-9 h-9 rounded-lg bg-[#6A1B9A] flex items-center justify-center text-xs font-bold text-white">
+                {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
-           </div>
+            </div>
+          </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-10">
-          <Outlet />
-        </div>
-      </main>
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-[#F8FAFC]">
+          <div className="p-6 lg:p-8 max-w-[1440px] mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

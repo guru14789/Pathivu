@@ -9,7 +9,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:studio": "drizzle-kit studio",
-    "workers": "tsx watch src/workers.ts"
+    "workers": "tsx watch src/workers.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

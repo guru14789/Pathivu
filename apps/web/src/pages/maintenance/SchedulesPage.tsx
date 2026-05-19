@@ -4,23 +4,19 @@ import {
   Calendar as CalendarIcon, 
   List, 
   Plus, 
-  Clock, 
-  AlertCircle, 
   CheckCircle2, 
   ChevronLeft, 
   ChevronRight,
-  Filter,
   Download,
   Mail,
-  RefreshCcw,
-  Bell,
-  Search
+  Search,
+  AlertCircle,
+  Bell
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
 import axios from 'axios';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from 'date-fns';
 
 // --- Types ---
 interface Schedule {
@@ -47,7 +43,7 @@ export default function SchedulesPage() {
   const isAdmin = ['super_admin', 'branch_admin', 'supervisor'].includes(user?.role || '');
 
   // --- Queries ---
-  const { data: schedules, isLoading } = useQuery({
+  const { data: schedules } = useQuery({
     queryKey: ['schedules', view, search],
     queryFn: async () => {
       const res = await axios.get('/api/schedules');
@@ -66,9 +62,9 @@ export default function SchedulesPage() {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'overdue': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'completed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      default: return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'overdue': return 'bg-red-50 text-red-600 border-red-200';
+      case 'completed': return 'bg-emerald-50 text-emerald-600';
+      default: return 'bg-purple-50 text-purple-600 border-purple-200';
     }
   };
 
@@ -77,26 +73,26 @@ export default function SchedulesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tighter">Asset Lifecycle Schedules</h1>
-          <p className="text-slate-400 font-medium text-sm">Preventive Maintenance, Calibration & Statutory Compliance Roadmap.</p>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Asset Lifecycle Schedules</h1>
+          <p className="text-gray-500 font-medium text-sm">Preventive Maintenance, Calibration & Statutory Compliance Roadmap.</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex p-1 bg-slate-900 border border-slate-800 rounded-2xl">
+          <div className="flex p-1 bg-gray-50 border border-gray-200 rounded-2xl">
             <button 
               onClick={() => setView('calendar')}
-              className={cn("p-2 rounded-xl transition-all", view === 'calendar' ? "bg-slate-800 text-blue-500" : "text-slate-500")}
+              className={cn("p-2 rounded-xl transition-all", view === 'calendar' ? "bg-purple-50 text-[#6A1B9A]" : "text-gray-400")}
             >
               <CalendarIcon size={20} />
             </button>
             <button 
               onClick={() => setView('list')}
-              className={cn("p-2 rounded-xl transition-all", view === 'list' ? "bg-slate-800 text-blue-500" : "text-slate-500")}
+              className={cn("p-2 rounded-xl transition-all", view === 'list' ? "bg-purple-50 text-[#6A1B9A]" : "text-gray-400")}
             >
               <List size={20} />
             </button>
           </div>
           {isAdmin && (
-            <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-blue-900/20 flex items-center gap-2 transition-all">
+            <button className="bg-[#6A1B9A] hover:bg-[#7B1FA2] text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center gap-2 transition-all">
               <Plus size={18} /> Plan New Schedule
             </button>
           )}
@@ -107,24 +103,24 @@ export default function SchedulesPage() {
         {/* Left Column: Calendar or List */}
         <div className="lg:col-span-8 space-y-8">
           {view === 'calendar' ? (
-            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-md">
-              <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-                <h3 className="text-lg font-black text-white">{format(currentDate, 'MMMM yyyy')}</h3>
+            <div className="bg-white border border-gray-200 shadow-sm rounded-3xl overflow-hidden">
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+                <h3 className="text-lg font-black text-gray-900">{format(currentDate, 'MMMM yyyy')}</h3>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400">
+                  <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-xl transition-all text-gray-400">
                     <ChevronLeft size={20} />
                   </button>
-                  <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-xs font-black uppercase text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all">
+                  <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-xs font-black uppercase text-[#6A1B9A] hover:bg-purple-50 rounded-xl transition-all">
                     Today
                   </button>
-                  <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2 hover:bg-slate-800 rounded-xl transition-all text-slate-400">
+                  <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2 hover:bg-gray-100 rounded-xl transition-all text-gray-400">
                     <ChevronRight size={20} />
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-7 border-b border-slate-800">
+              <div className="grid grid-cols-7 border-b border-gray-200">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                  <div key={d} className="py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-800 last:border-0">
+                  <div key={d} className="py-4 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest border-r border-gray-200 last:border-0">
                     {d}
                   </div>
                 ))}
@@ -136,20 +132,20 @@ export default function SchedulesPage() {
                     <div 
                       key={i} 
                       className={cn(
-                        "p-2 border-r border-b border-slate-800 hover:bg-slate-800/20 transition-all group",
+                        "p-2 border-r border-b border-gray-100 hover:bg-gray-50 transition-all group",
                         i % 7 === 6 && "border-r-0"
                       )}
                     >
                       <span className={cn(
                         "text-xs font-bold",
-                        isSameDay(day, new Date()) ? "text-blue-500" : "text-slate-600 group-hover:text-slate-400"
+                        isSameDay(day, new Date()) ? "text-[#6A1B9A]" : "text-gray-400 group-hover:text-gray-600"
                       )}>
                         {format(day, 'd')}
                       </span>
                       <div className="mt-2 space-y-1">
                         {daySchedules.map(s => (
-                          <div key={s.id} className="flex items-center gap-1.5 p-1 bg-blue-500/10 border border-blue-500/20 rounded text-[8px] font-black text-blue-400 uppercase truncate">
-                            <div className="w-1 h-1 rounded-full bg-blue-500" />
+                          <div key={s.id} className="flex items-center gap-1.5 p-1 bg-purple-50 border border-purple-200 rounded text-[8px] font-black text-[#6A1B9A] uppercase truncate">
+                            <div className="w-1 h-1 rounded-full bg-[#6A1B9A]" />
                             {s.asset_tag}
                           </div>
                         ))}
@@ -160,48 +156,48 @@ export default function SchedulesPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-slate-900/30 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-md">
-              <div className="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-3xl overflow-hidden">
+              <div className="p-6 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                  <div className="relative w-64">
-                   <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
+                   <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
                    <input 
                      value={search}
                      onChange={e => setSearch(e.target.value)}
                      placeholder="Filter assets..."
-                     className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-9 pr-4 text-xs text-white"
+                     className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-4 text-xs text-gray-900 placeholder:text-gray-400"
                    />
                  </div>
-                 <button className="text-xs font-black text-slate-500 uppercase flex items-center gap-2 hover:text-white transition-all">
+                 <button className="text-xs font-black text-gray-500 uppercase flex items-center gap-2 hover:text-gray-700 transition-all">
                     <Download size={16} /> Export CSV
                  </button>
               </div>
               <table className="w-full">
                 <thead>
-                  <tr className="text-left border-b border-slate-800">
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Asset Entity</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Type / Cycle</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Next Due</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                  <tr className="text-left border-b border-gray-200">
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Asset Entity</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Type / Cycle</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Next Due</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {schedules?.map(s => (
-                    <tr key={s.id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-all">
+                    <tr key={s.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-all">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-xs font-black text-blue-500 uppercase">{s.asset_tag}</span>
-                          <span className="text-xs font-bold text-white">{s.asset_name}</span>
+                          <span className="text-xs font-black text-[#6A1B9A] uppercase">{s.asset_tag}</span>
+                          <span className="text-xs font-bold text-gray-900">{s.asset_name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-white uppercase tracking-widest">{s.type}</span>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase">{s.frequency}</span>
+                          <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">{s.type}</span>
+                          <span className="text-[10px] text-gray-500 font-bold uppercase">{s.frequency}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                         <span className="text-xs font-bold text-white">{format(new Date(s.next_due_date), 'dd MMM yyyy')}</span>
+                         <span className="text-xs font-bold text-gray-900">{format(new Date(s.next_due_date), 'dd MMM yyyy')}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className={cn("px-2 py-0.5 rounded text-[10px] font-black uppercase border", getStatusColor(s.status))}>
@@ -209,7 +205,7 @@ export default function SchedulesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="p-2 text-slate-600 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all">
+                        <button className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all">
                           <CheckCircle2 size={18} />
                         </button>
                       </td>
@@ -224,24 +220,24 @@ export default function SchedulesPage() {
         {/* Right Column: Overdue & Alerts */}
         <div className="lg:col-span-4 space-y-8">
           {/* Overdue Section */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-6">
+          <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
                 <AlertCircle size={16} className="text-red-500" /> Overdue Priority
               </h3>
               <span className="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">4</span>
             </div>
             <div className="space-y-4">
               {schedules?.filter(s => s.status === 'overdue').map(s => (
-                <div key={s.id} className="p-4 bg-slate-950 border border-slate-800 rounded-2xl group cursor-pointer hover:border-red-500/30 transition-all">
+                <div key={s.id} className="p-4 bg-gray-50 border border-gray-200 rounded-2xl group cursor-pointer hover:border-red-300 transition-all">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-tighter">{s.asset_tag}</span>
-                    <span className="text-[8px] font-black text-red-500 uppercase bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">Critical Delay</span>
+                    <span className="text-[10px] font-black text-[#6A1B9A] uppercase tracking-tighter">{s.asset_tag}</span>
+                    <span className="text-[8px] font-black text-red-600 uppercase bg-red-50 px-2 py-0.5 rounded border border-red-200">Critical Delay</span>
                   </div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">{s.asset_name}</h4>
+                  <h4 className="text-xs font-bold text-gray-900 group-hover:text-[#6A1B9A] transition-colors">{s.asset_name}</h4>
                   <div className="mt-3 flex items-center justify-between text-[10px]">
-                    <span className="text-slate-500 font-bold uppercase">Was Due: {format(new Date(s.next_due_date), 'dd MMM')}</span>
-                    <button className="text-blue-500 font-black flex items-center gap-1">
+                    <span className="text-gray-500 font-bold uppercase">Was Due: {format(new Date(s.next_due_date), 'dd MMM')}</span>
+                    <button className="text-[#6A1B9A] font-black flex items-center gap-1">
                       Action <ChevronRight size={12} />
                     </button>
                   </div>
@@ -251,33 +247,33 @@ export default function SchedulesPage() {
           </div>
 
           {/* 7. Alert Status Indicators */}
-          <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-6">
-            <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+          <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 space-y-6">
+            <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
               <Bell size={16} className="text-amber-500" /> Automated Sentinel
             </h3>
             <div className="space-y-4">
                {[
-                 { label: '30-Day Critical Alert', sent: 12, pending: 4, icon: Mail, color: 'text-blue-400' },
-                 { label: '60-Day Forecast Alert', sent: 28, pending: 0, icon: Mail, color: 'text-slate-400' },
+                 { label: '30-Day Critical Alert', sent: 12, pending: 4, icon: Mail, color: 'text-[#6A1B9A]' },
+                 { label: '60-Day Forecast Alert', sent: 28, pending: 0, icon: Mail, color: 'text-gray-400' },
                ].map((alert, i) => (
-                 <div key={i} className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl">
+                 <div key={i} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-2xl">
                     <div className="flex items-center gap-3">
-                      <div className={cn("p-2 rounded-lg bg-slate-900", alert.color)}>
+                      <div className={cn("p-2 rounded-lg bg-gray-100", alert.color)}>
                         <alert.icon size={16} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-white uppercase">{alert.label}</p>
-                        <p className="text-[10px] text-slate-500 font-medium">Auto-sent to HODs</p>
+                        <p className="text-[10px] font-black text-gray-900 uppercase">{alert.label}</p>
+                        <p className="text-[10px] text-gray-500 font-medium">Auto-sent to HODs</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-white">{alert.sent}</p>
-                      <p className="text-[10px] text-slate-500 font-black uppercase">Sent</p>
+                      <p className="text-[10px] font-black text-gray-900">{alert.sent}</p>
+                      <p className="text-[10px] text-gray-500 font-black uppercase">Sent</p>
                     </div>
                  </div>
                ))}
             </div>
-            <button className="w-full py-3 bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-700 hover:text-white transition-all border border-slate-700">
+            <button className="w-full py-3 bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all border border-gray-200">
               Trigger Manual Resync
             </button>
           </div>

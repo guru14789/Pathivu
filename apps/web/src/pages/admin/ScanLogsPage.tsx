@@ -6,15 +6,13 @@ import {
   Activity, 
   MapPin, 
   User, 
-  Clock, 
-  ExternalLink, 
   Search,
   Zap,
   ZapOff,
   ChevronRight,
   Globe,
   ShieldAlert,
-  Info
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { socket } from '../../lib/socket';
@@ -38,7 +36,7 @@ interface ScanEvent {
 }
 
 export default function ScanLogsPage() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [isLive, setIsLive] = useState(false);
   const [liveEvents, setLiveEvents] = useState<ScanEvent[]>([]);
   const [search, setSearch] = useState('');
@@ -81,11 +79,11 @@ export default function ScanLogsPage() {
 
   const getActionBadge = (action: string) => {
     const styles: any = {
-      viewed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      fault_logged: "bg-red-500/10 text-red-500 border-red-500/20",
-      condition_updated: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      viewed: "bg-purple-100 text-purple-600 border-purple-200",
+      fault_logged: "bg-red-100 text-red-600 border-red-200",
+      condition_updated: "bg-emerald-100 text-emerald-600 border-emerald-200",
     };
-    return cn("px-2 py-0.5 rounded text-[10px] font-black uppercase border", styles[action] || "bg-slate-500/10 text-slate-400");
+    return cn("px-2 py-0.5 rounded text-[10px] font-black uppercase border", styles[action] || "bg-gray-100 text-gray-500");
   };
 
   return (
@@ -93,45 +91,45 @@ export default function ScanLogsPage() {
       {/* Header & Export */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tighter">Scan Audit Intelligence</h1>
-          <p className="text-slate-400 font-medium text-sm">Real-time oversight of all asset interactions and unauthorized scans.</p>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Scan Audit Intelligence</h1>
+          <p className="text-gray-500 font-medium text-sm">Real-time oversight of all asset interactions and unauthorized scans.</p>
         </div>
         <div className="flex items-center gap-3">
-          {/* 3. Live Feed Toggle */}
+          {/* Live Feed Toggle */}
           <button 
             onClick={() => setIsLive(!isLive)}
             className={cn(
               "flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold transition-all border",
               isLive 
-                ? "bg-emerald-500/10 border-emerald-500 text-emerald-500 shadow-lg shadow-emerald-900/20" 
-                : "bg-slate-900 border-slate-800 text-slate-500"
+                ? "bg-emerald-50 border-emerald-500 text-emerald-600 shadow-lg shadow-emerald-900/10" 
+                : "bg-gray-100 border-gray-200 text-gray-500"
             )}
           >
             {isLive ? <Zap className="animate-pulse" size={18} /> : <ZapOff size={18} />}
             {isLive ? "Live Feed Active" : "Go Live"}
           </button>
-          {/* 5. Export Button */}
-          <button className="flex items-center gap-2 px-5 py-3 bg-slate-800 text-white rounded-2xl text-sm font-bold border border-slate-700 hover:bg-slate-700 transition-all">
+          {/* Export Button */}
+          <button className="flex items-center gap-2 px-5 py-3 bg-gray-100 text-gray-700 rounded-2xl text-sm font-bold border border-gray-200 hover:bg-gray-200 transition-all">
             <Download size={18} /> Export Excel
           </button>
         </div>
       </div>
 
-      {/* 1. Filter Bar */}
-      <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl grid md:grid-cols-4 gap-6">
+      {/* Filter Bar */}
+      <div className="bg-gray-50 border border-gray-200 p-6 rounded-3xl grid md:grid-cols-4 gap-6">
         <div className="relative">
-          <Search className="absolute left-3 top-3 text-slate-500" size={18} />
+          <Search className="absolute left-3 top-3 text-gray-400" size={18} />
           <input 
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search asset or user..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white focus:border-blue-500 outline-none transition-all"
+            className="w-full bg-white border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-xs text-gray-900 placeholder:text-gray-400 focus:border-[#6A1B9A] outline-none transition-all"
           />
         </div>
         <select 
           value={filters.hospital}
           onChange={e => setFilters(prev => ({ ...prev, hospital: e.target.value }))}
-          className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-blue-500"
+          className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-700 outline-none focus:border-[#6A1B9A]"
         >
           <option value="">All Hospitals</option>
           {hospitals?.map((h: any) => <option key={h.hospital_id} value={h.hospital_id}>{h.name}</option>)}
@@ -139,31 +137,31 @@ export default function ScanLogsPage() {
         <select 
           value={filters.action}
           onChange={e => setFilters(prev => ({ ...prev, action: e.target.value }))}
-          className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-blue-500"
+          className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-700 outline-none focus:border-[#6A1B9A]"
         >
           <option value="">All Actions</option>
           <option value="viewed">Viewed</option>
           <option value="fault_logged">Fault Logged</option>
           <option value="condition_updated">Condition Updated</option>
         </select>
-        <button className="flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl py-2.5 text-xs font-bold hover:bg-blue-500 transition-all">
+        <button className="flex items-center justify-center gap-2 bg-[#6A1B9A] hover:bg-[#7B1FA2] text-white rounded-xl py-2.5 text-xs font-bold transition-all">
           <Filter size={14} /> Apply Advanced Filters
         </button>
       </div>
 
-      {/* 2. Scan Events Table */}
-      <div className="bg-slate-900/30 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-md">
+      {/* Scan Events Table */}
+      <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-900/50 text-left">
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Digital Identity</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Interacted By</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Role / Context</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Action Taken</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Origin Intelligence</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Timestamp</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Drill-down</th>
+              <tr className="bg-gray-50 text-left">
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Digital Identity</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Interacted By</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Role / Context</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Action Taken</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Origin Intelligence</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest">Timestamp</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">Drill-down</th>
               </tr>
             </thead>
             <tbody>
@@ -173,30 +171,30 @@ export default function ScanLogsPage() {
                     key={log.id}
                     initial={{ opacity: 0, x: isLive ? -20 : 0 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30 transition-all group"
+                    className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-all group"
                   >
-                    {/* 4. Asset Drill-down */}
+                    {/* Asset Drill-down */}
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-xs font-black text-blue-500 uppercase">{log.asset_tag}</span>
-                        <span className="text-xs font-bold text-white group-hover:text-blue-400 transition-colors cursor-pointer">{log.asset_name}</span>
+                        <span className="text-xs font-black text-[#6A1B9A] uppercase">{log.asset_tag}</span>
+                        <span className="text-xs font-bold text-gray-900 group-hover:text-[#6A1B9A] transition-colors cursor-pointer">{log.asset_name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black border",
-                          log.scanned_by ? "bg-blue-500/10 text-blue-500 border-blue-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+                          log.scanned_by ? "bg-purple-100 text-[#6A1B9A] border-purple-200" : "bg-red-100 text-red-600 border-red-200"
                         )}>
                           {log.scanned_by ? <User size={14} /> : <ShieldAlert size={14} />}
                         </div>
-                        <span className={cn("text-xs font-bold", log.scanned_by ? "text-white" : "text-red-400")}>
+                        <span className={cn("text-xs font-bold", log.scanned_by ? "text-gray-900" : "text-red-500")}>
                           {log.scanned_by || "Anonymous Scan"}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                         {log.role || "Public Visitor"}
                       </span>
                     </td>
@@ -207,13 +205,13 @@ export default function ScanLogsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <Globe size={12} className="text-slate-600" />
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <Globe size={12} className="text-gray-400" />
                           <span>{log.ip_address}</span>
                         </div>
                         {log.location && (
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
-                            <MapPin size={10} className="text-slate-600" />
+                          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                            <MapPin size={10} className="text-gray-400" />
                             <span>{log.location}</span>
                           </div>
                         )}
@@ -221,12 +219,12 @@ export default function ScanLogsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-white">{format(new Date(log.timestamp), 'HH:mm:ss')}</span>
-                        <span className="text-[10px] text-slate-500 uppercase">{format(new Date(log.timestamp), 'dd MMM yyyy')}</span>
+                        <span className="text-xs font-bold text-gray-900">{format(new Date(log.timestamp), 'HH:mm:ss')}</span>
+                        <span className="text-[10px] text-gray-400 uppercase">{format(new Date(log.timestamp), 'dd MMM yyyy')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-slate-600 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all">
+                      <button className="p-2 text-gray-400 hover:text-[#6A1B9A] hover:bg-purple-50 rounded-lg transition-all">
                         <ChevronRight size={18} />
                       </button>
                     </td>
@@ -237,14 +235,14 @@ export default function ScanLogsPage() {
           </table>
           {isLoading && (
             <div className="py-20 flex flex-col items-center justify-center space-y-4">
-              <Loader2 className="animate-spin text-blue-500" size={32} />
-              <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Syncing Audit Stream...</p>
+              <Loader2 className="animate-spin text-[#6A1B9A]" size={32} />
+              <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Syncing Audit Stream...</p>
             </div>
           )}
           {!isLoading && displayLogs.length === 0 && (
             <div className="py-20 flex flex-col items-center justify-center space-y-4 opacity-50">
-               <ShieldAlert size={64} className="text-slate-800" />
-               <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">No Scan Events Found</p>
+               <ShieldAlert size={64} className="text-gray-200" />
+               <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Scan Events Found</p>
             </div>
           )}
         </div>
@@ -252,31 +250,31 @@ export default function ScanLogsPage() {
 
       {/* Analytics Summary */}
       <div className="grid md:grid-cols-3 gap-8">
-        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl flex items-center gap-5">
-           <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center">
+        <div className="bg-white border border-gray-200 p-6 rounded-3xl flex items-center gap-5 shadow-sm">
+           <div className="w-12 h-12 bg-purple-100 text-[#6A1B9A] rounded-2xl flex items-center justify-center">
               <Activity size={24} />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Scans Today</p>
-              <p className="text-2xl font-black text-white">1,402</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Scans Today</p>
+              <p className="text-2xl font-black text-gray-900">1,402</p>
            </div>
         </div>
-        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl flex items-center gap-5">
-           <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center">
+        <div className="bg-white border border-gray-200 p-6 rounded-3xl flex items-center gap-5 shadow-sm">
+           <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
               <ShieldAlert size={24} />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Anonymous Interactions</p>
-              <p className="text-2xl font-black text-white">42</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Anonymous Interactions</p>
+              <p className="text-2xl font-black text-gray-900">42</p>
            </div>
         </div>
-        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl flex items-center gap-5">
-           <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center">
+        <div className="bg-white border border-gray-200 p-6 rounded-3xl flex items-center gap-5 shadow-sm">
+           <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
               <Zap size={24} />
            </div>
            <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conversion to Fault</p>
-              <p className="text-2xl font-black text-white">8.4%</p>
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Conversion to Fault</p>
+              <p className="text-2xl font-black text-gray-900">8.4%</p>
            </div>
         </div>
       </div>

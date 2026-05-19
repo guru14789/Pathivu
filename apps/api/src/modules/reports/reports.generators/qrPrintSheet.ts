@@ -50,7 +50,7 @@ export async function generateQRPrintSheetPDF(assets: any[]) {
   });
   
   const page = await browser.newPage();
-  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' as any });
   const pdf = await page.pdf({
     format: 'A4',
     printBackground: true,

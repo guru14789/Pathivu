@@ -41,7 +41,13 @@ export const ppmWorker = new Worker('ppm-alerts', async (job) => {
 
         const adminEmails = admins.map(a => a.email);
         
-        await sendPpmAlert(item.asset, 30, adminEmails);
+        for (const email of adminEmails) {
+          await sendPpmAlert({
+            asset: item.asset,
+            daysUntilDue: 30,
+            adminEmail: email
+          });
+        }
         
         emitToHospital(item.hospital.hospital_id, 'alert:ppm', {
           asset_tag: item.asset.asset_tag,
